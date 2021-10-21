@@ -1141,6 +1141,7 @@ class ContourSet(cm.ScalarMappable, ContourLabeler):
                 self.locator = ticker.MaxNLocator(N + 1, min_n_ticks=1)
 
         lev = self.locator.tick_values(self.zmin, self.zmax)
+        print('level', lev, self.zmin, self.zmax)
 
         try:
             if self.locator._symmetric:

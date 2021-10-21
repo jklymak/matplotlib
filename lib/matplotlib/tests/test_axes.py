@@ -4948,7 +4948,7 @@ def test_twin_with_aspect(twin):
     assert_array_equal(ax.bbox.extents,
                        ax_twin.bbox.extents)
 
-
+JUNK
 def test_relim_visible_only():
     x1 = (0., 10.)
     y1 = (0., 10.)

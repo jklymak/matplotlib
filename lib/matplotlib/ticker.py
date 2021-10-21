@@ -2119,8 +2119,9 @@ class MaxNLocator(Locator):
             vmin = -vmax
         vmin, vmax = mtransforms.nonsingular(
             vmin, vmax, expander=1e-13, tiny=1e-14)
+        print('vmion, vmax', vmin, vmax)
         locs = self._raw_ticks(vmin, vmax)
-
+        print('locs', locs)
         prune = self._prune
         if prune == 'lower':
             locs = locs[1:]
