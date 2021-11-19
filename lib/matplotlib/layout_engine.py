@@ -19,7 +19,6 @@ engines tend to be complicated, users and downstream libraries can now create
 their own layout engine and connect it to a figure.
 """
 
-import matplotlib as mpl
 import matplotlib._api as _api
 
 from matplotlib._constrained_layout import do_constrained_layout
@@ -138,13 +137,11 @@ class TightLayoutEngine(LayoutEngine):
         if kwargs:
             fig.subplots_adjust(**kwargs)
 
-    def set(self, *, pad=1.08, w_pad=None, h_pad=None, rect=(0, 0, 1, 1)):
+    def set(self, *, pad=None, w_pad=None, h_pad=None, rect=None):
         todo = ['pad', 'w_pad', 'h_pad', 'rect']
         for td in todo:
             if locals()[td] is not None:
                 self._params[td] = locals()[td]
-            else:
-                self._params[td] = None
 
 
 class ConstrainedLayoutEngine(LayoutEngine):
@@ -215,6 +212,3 @@ class ConstrainedLayoutEngine(LayoutEngine):
         for td in self.set.__kwdefaults__:
             if locals()[td] is not None:
                 self._params[td] = locals()[td]
-            else:
-                self._params[td] = (
-                    mpl.rcParams['figure.constrained_layout.' + td])
