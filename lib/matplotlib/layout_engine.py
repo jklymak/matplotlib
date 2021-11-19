@@ -138,16 +138,13 @@ class TightLayoutEngine(LayoutEngine):
         if kwargs:
             fig.subplots_adjust(**kwargs)
 
-    def set(self, pad=1.08, w_pad=None, h_pad=None, rect=(0, 0, 1, 1)):
+    def set(self, *, pad=1.08, w_pad=None, h_pad=None, rect=(0, 0, 1, 1)):
         todo = ['pad', 'w_pad', 'h_pad', 'rect']
         for td in todo:
             if locals()[td] is not None:
                 self._params[td] = locals()[td]
             else:
                 self._params[td] = None
-
-        if self._params['pad'] is None:
-            self._params['pad'] = 1.08
 
 
 class ConstrainedLayoutEngine(LayoutEngine):
