@@ -252,10 +252,9 @@ def test_constrained_layout13():
     for ax in axs.flat:
         pcm = example_pcolor(ax, fontsize=12)
         fig.colorbar(pcm, ax=ax, shrink=0.6, aspect=20., pad=0.02)
-    with pytest.warns(UserWarning,
-                      match='is not recognized, and will be ignored'):
-        fig.get_layout_engine().set_params(wpad=1, hpad=2)
-    fig.get_layout_engine().set_params(w_pad=24./72., h_pad=24./72.)
+    with pytest.raises(TypeError):
+        fig.get_layout_engine().set(wpad=1, hpad=2)
+    fig.get_layout_engine().set(w_pad=24./72., h_pad=24./72.)
 
 
 @image_comparison(['constrained_layout14.png'])
@@ -265,7 +264,7 @@ def test_constrained_layout14():
     for ax in axs.flat:
         pcm = example_pcolor(ax, fontsize=12)
         fig.colorbar(pcm, ax=ax, shrink=0.6, aspect=20., pad=0.02)
-    fig.get_layout_engine().set_params(
+    fig.get_layout_engine().set(
             w_pad=3./72., h_pad=3./72.,
             hspace=0.2, wspace=0.2)
 
@@ -431,7 +430,7 @@ def test_colorbar_align():
                 cb.ax.yaxis.set_ticks([])
                 ax.set_xticklabels([])
                 ax.set_yticklabels([])
-        fig.get_layout_engine().set_params(w_pad=4 / 72, h_pad=4 / 72,
+        fig.get_layout_engine().set(w_pad=4 / 72, h_pad=4 / 72,
                                            hspace=0.1, wspace=0.1)
 
         fig.draw_without_rendering()

@@ -228,14 +228,14 @@ fig.savefig('../../doc/_static/constrained_layout_2b.png',
 #
 # Padding between axes is controlled in the horizontal by *w_pad* and
 # *wspace*, and vertical by *h_pad* and *hspace*.  These can be edited
-# via ``fig.get_layout_engine().set_params``.  *w/h_pad* are
+# via ``fig.get_layout_engine().set``.  *w/h_pad* are
 # the minimum space around the axes in units of inches:
 
 fig, axs = plt.subplots(2, 2, layout="constrained")
 for ax in axs.flat:
     example_plot(ax, hide_labels=True)
-fig.get_layout_engine().set_params(w_pad=4 / 72, h_pad=4 / 72, hspace=0,
-                                   wspace=0)
+fig.get_layout_engine().set(w_pad=4 / 72, h_pad=4 / 72, hspace=0,
+                            wspace=0)
 
 ##########################################
 # Spacing between subplots is further set by *wspace* and *hspace*. These
@@ -247,8 +247,8 @@ fig.get_layout_engine().set_params(w_pad=4 / 72, h_pad=4 / 72, hspace=0,
 fig, axs = plt.subplots(2, 2, layout="constrained")
 for ax in axs.flat:
     example_plot(ax, hide_labels=True)
-fig.get_layout_engine().set_params(w_pad=4 / 72, h_pad=4 / 72, hspace=0.2,
-                                   wspace=0.2)
+fig.get_layout_engine().set(w_pad=4 / 72, h_pad=4 / 72, hspace=0.2,
+                            wspace=0.2)
 
 ##########################################
 # If there are more than two columns, the *wspace* is shared between them,
@@ -258,8 +258,8 @@ fig.get_layout_engine().set_params(w_pad=4 / 72, h_pad=4 / 72, hspace=0.2,
 fig, axs = plt.subplots(2, 3, layout="constrained")
 for ax in axs.flat:
     example_plot(ax, hide_labels=True)
-fig.get_layout_engine().set_params(w_pad=4 / 72, h_pad=4 / 72, hspace=0.2,
-                                   wspace=0.2)
+fig.get_layout_engine().set(w_pad=4 / 72, h_pad=4 / 72, hspace=0.2,
+                            wspace=0.2)
 
 ##########################################
 # GridSpecs also have optional *hspace* and *wspace* keyword arguments,
@@ -271,8 +271,8 @@ for ax in axs.flat:
     example_plot(ax, hide_labels=True)
 # this has no effect because the space set in the gridspec trumps the
 # space set in constrained_layout.
-fig.get_layout_engine().set_params(w_pad=4 / 72, h_pad=4 / 72, hspace=0.0,
-                                   wspace=0.0)
+fig.get_layout_engine().set(w_pad=4 / 72, h_pad=4 / 72, hspace=0.0,
+                            wspace=0.0)
 plt.show()
 
 ##########################################
@@ -291,8 +291,8 @@ for pad, ax in zip(pads, axs.flat):
     ax.set_xticklabels([])
     ax.set_yticklabels([])
     ax.set_title(f'pad: {pad}')
-fig.get_layout_engine().set_params(w_pad=2 / 72, h_pad=2 / 72, hspace=0.2,
-                                   wspace=0.2)
+fig.get_layout_engine().set(w_pad=2 / 72, h_pad=2 / 72, hspace=0.2,
+                            wspace=0.2)
 
 ##########################################
 # rcParams

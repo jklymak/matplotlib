@@ -16,8 +16,8 @@ from matplotlib._api.deprecation import MatplotlibDeprecationWarning
 from matplotlib.testing.decorators import image_comparison, check_figures_equal
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
-from matplotlib.layout_engine import (constrained_layout_engine,
-                                      tight_layout_engine)
+from matplotlib.layout_engine import (ConstrainedLayoutEngine,
+                                      TightLayoutEngine)
 from matplotlib.ticker import AutoMinorLocator, FixedFormatter, ScalarFormatter
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
@@ -581,18 +581,18 @@ def test_invalid_layouts():
     with pytest.warns(UserWarning):
         # this should warn,
         fig.subplots_adjust(top=0.8)
-    assert isinstance(fig.get_layout_engine(), constrained_layout_engine)
+    assert isinstance(fig.get_layout_engine(), ConstrainedLayoutEngine)
 
     # Using layout + (tight|constrained)_layout warns, but the former takes
     # precedence.
     wst = "The Figure parameters 'layout' and 'tight_layout' or "
     with pytest.warns(UserWarning, match=wst):
         fig = Figure(layout='tight', tight_layout=False)
-    assert isinstance(fig.get_layout_engine(), tight_layout_engine)
+    assert isinstance(fig.get_layout_engine(), TightLayoutEngine)
     with pytest.warns(UserWarning, match=wst):
         fig = Figure(layout='constrained', constrained_layout=False)
-    assert not isinstance(fig.get_layout_engine(), tight_layout_engine)
-    assert isinstance(fig.get_layout_engine(), constrained_layout_engine)
+    assert not isinstance(fig.get_layout_engine(), TightLayoutEngine)
+    assert isinstance(fig.get_layout_engine(), ConstrainedLayoutEngine)
 
     with pytest.raises(ValueError,
                        match="Invalid value for 'layout'"):
