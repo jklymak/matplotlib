@@ -19,6 +19,7 @@ engines tend to be complicated, users and downstream libraries can now create
 their own layout engine and connect it to a figure.
 """
 
+import matplotlib as mpl
 import matplotlib._api as _api
 
 from matplotlib._constrained_layout import do_constrained_layout
@@ -174,6 +175,12 @@ class ConstrainedLayoutEngine(LayoutEngine):
         super().__init__()
         self.colorbar_gridspec = False
         self.adjust_compatible = False
+        # set the defaults:
+        self.set(w_pad=mpl.rcParams['figure.constrained_layout.w_pad'],
+                 h_pad=mpl.rcParams['figure.constrained_layout.h_pad'],
+                 wspace=mpl.rcParams['figure.constrained_layout.wspace'],
+                 hspace=mpl.rcParams['figure.constrained_layout.hspace'])
+        # set anything that was passed in (None will be ignored):
         self.set(w_pad=w_pad, h_pad=h_pad, wspace=wspace, hspace=hspace)
 
     def execute(self):
