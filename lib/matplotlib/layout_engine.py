@@ -110,6 +110,9 @@ class TightLayoutEngine(LayoutEngine):
         super().__init__()
         self.colorbar_gridspec = True
         self.adjust_compatible = True
+        for td in ['pad', 'h_pad', 'w_pad', 'rect']:
+            # initialize these in case None is passed in above:
+            self._params[td] = None
         self.set(pad=pad, h_pad=h_pad, w_pad=w_pad, rect=rect)
 
     def execute(self):
