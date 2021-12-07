@@ -160,8 +160,6 @@ class ConstrainedLayoutEngine(LayoutEngine):
 
         Parameters
         ----------
-        fig : `~.figure.Figure`
-            Figure the layout engine will be used on.
         h_pad, w_pad : float
             Padding around the axes elements in figure-normalized units.
             Default to :rc:`figure.constrained_layout.h_pad` and
