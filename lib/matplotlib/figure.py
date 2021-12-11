@@ -2535,7 +2535,7 @@ class Figure(FigureBase):
 
         """
         if isinstance(self.get_layout_engine(), ConstrainedLayoutEngine):
-            self.get_layout_engine().set_params(**kwargs)
+            self.get_layout_engine().set(**kwargs)
 
     @_api.deprecated("3.6", alternative="fig.get_layout_engine().get_info()")
     def get_constrained_layout_pads(self, relative=False):
