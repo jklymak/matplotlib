@@ -41,6 +41,7 @@ from matplotlib.patches import Rectangle
 from matplotlib.text import Text
 from matplotlib.transforms import (Affine2D, Bbox, BboxTransformTo,
                                    TransformedBbox)
+
 _log = logging.getLogger(__name__)
 
 
@@ -1133,7 +1134,7 @@ default: %(va)s
             ax = getattr(mappable, "axes", self.gca())
 
         if (self.get_layout_engine() is not None and
-                not self.get_layout_engine().colorbar_gridspec):
+                not self.get_layout_engine().get_colorbar_gridspec()):
             use_gridspec = False
         # Store the value of gca so that we can set it back later on.
         if cax is None:
@@ -1188,11 +1189,12 @@ default: %(va)s
             as a fraction of the average Axes height.
         """
         if (self.get_layout_engine() is not None and
-                not self.get_layout_engine().adjust_compatible):
+                not self.get_layout_engine().get_adjust_compatible()):
             _api.warn_external(
                 "This figure was using a layout engine that is "
                 "incompatible with subplots_adjust and/or tight_layout; "
                 "not calling subplots_adjust.")
+            return
         self.subplotpars.update(left, bottom, right, top, wspace, hspace)
         for ax in self.axes:
             if hasattr(ax, 'get_subplotspec'):
@@ -2227,7 +2229,7 @@ class Figure(FigureBase):
               decorations do not overlap. See `.Figure.set_tight_layout` for
               further details.
 
-            - A `.LayoutEngine` instance. Native layout instances are
+            - A `.LayoutEngine` instance. Builtin layout classes are
               `.TightLayoutEngine` and `.ConstrainedLayoutEngine`.
               However other subclasses are possible.
 
@@ -2260,11 +2262,11 @@ class Figure(FigureBase):
                     "'layout' parameter")
             self.set_layout_engine(layout='tight')
             if isinstance(tight_layout, dict):
-                self.get_layout_engine().set_info(tight_layout)
+                self.get_layout_engine().set(tight_layout)
         elif constrained_layout is not None:
             self.set_layout_engine(layout='constrained')
             if isinstance(constrained_layout, dict):
-                self.get_layout_engine().set_info(constrained_layout)
+                self.get_layout_engine().set(constrained_layout)
         else:
             # everything is None, so use default:
             self.set_layout_engine(layout=layout)
@@ -2337,7 +2339,7 @@ class Figure(FigureBase):
             own layout engines as well.
         kwargs: dict
             The keyword arguments are passed to the layout engine to set things
-            like padding and margin sizes.
+            like padding and margin sizes.  Only used if *layout* is a string.
         """
         if layout is None:
             if mpl.rcParams['figure.autolayout']:
@@ -2468,7 +2470,8 @@ class Figure(FigureBase):
             tight = mpl.rcParams['figure.autolayout']
         _tight_parameters = tight if isinstance(tight, dict) else {}
         if bool(tight):
-            self.set_layout_engine(TightLayoutEngine(self, _tight_parameters))
+            self.set_layout_engine(TightLayoutEngine(self,
+                                                     **_tight_parameters))
         self.stale = True
 
     def get_constrained_layout(self):
@@ -2501,11 +2504,12 @@ class Figure(FigureBase):
         _constrained = bool(constrained)
         _parameters = constrained if isinstance(constrained, dict) else {}
         if _constrained:
-            self.set_layout_engine(ConstrainedLayoutEngine(self, _parameters))
+            self.set_layout_engine(ConstrainedLayoutEngine(self,
+                                                           **_parameters))
         self.stale = True
 
     @_api.deprecated(
-         "3.6", alternative="figure._layout_engine.set_info()")
+         "3.6", alternative="figure.get_layout_engine().set(**kwargs)")
     def set_constrained_layout_pads(self, **kwargs):
         """
         Set padding for ``constrained_layout``.
@@ -2836,7 +2840,7 @@ class Figure(FigureBase):
             renderer.open_group('figure', gid=self.get_gid())
             if self.axes and self.get_layout_engine() is not None:
                 try:
-                    self.get_layout_engine().execute()
+                    self.get_layout_engine().execute(self)
                 except ValueError:
                     pass
                     # ValueError can occur when resizing a window.
@@ -3182,9 +3186,9 @@ class Figure(FigureBase):
         """
         if not isinstance(self.get_layout_engine(), ConstrainedLayoutEngine):
             return None
-        return self.get_layout_engine().execute()
+        return self.get_layout_engine().execute(self)
 
-    def tight_layout(self, **kwargs):
+    def tight_layout(self, *, pad=1.08, h_pad=None, w_pad=None, rect=None):
         """
         Adjust the padding between and around subplots.
 
@@ -3217,10 +3221,13 @@ class Figure(FigureBase):
                                "might be incorrect.")
         # note that here we do not _set_ the figures engine to tight_layout
         # but rather just perform the layout in place for back compatibility.
-        engine = TightLayoutEngine(**kwargs)
-        self.set_layout_engine(engine)
-        engine.execute()
-        self.set_layout_engine(None)
+        engine = TightLayoutEngine(pad=pad, h_pad=h_pad, w_pad=w_pad,
+                                   rect=rect)
+        try:
+            self.set_layout_engine(engine)
+            engine.execute(self)
+        finally:
+            self.set_layout_engine(None)
 
 
 def figaspect(arg):

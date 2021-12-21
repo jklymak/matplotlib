@@ -1,23 +1,20 @@
 """
-A module to define layout engines for Matplotlib.
+Classes to layout elements in a `.Figure`.
 
 Figures have a ``layout_engine`` property that holds a subclass of
 `~.LayoutEngine` defined here (or *None* for no layout).  At draw time
-``figure.get_layout_engine.execute()`` is called, the goal of which is usually
-to rearrange Axes on the figure to produce a pleasing layout.  Note that
-this could also be implimented as a ``draw`` callback, however when
-printing we often disable the layout engine for the final draw, so it is
-helpful to have a different callback mechanism. It is also useful to
-know the layout engine while the figure is being created, in particular
-to deal with colorbars, so having a dedicated property of the figure to
-querry is useful.
+``figure.get_layout_engine().execute()`` is called, the goal of which is usually
+to rearrange Axes on the figure to produce a pleasing layout. This is like a
+``draw`` callback, however when printing we disable the layout engine for the
+final draw and it is useful to know the layout engine while the figure is being
+created, in particular to deal with colorbars.
 
-Matplotlib has two native layout engines, ``tight_layout`` and
-``constrained_layout``, which are implimented using this formalism
-as `.TightLayoutEngine` and `.ConstrainedLayoutEngine`.  While layout
-engines tend to be complicated, users and downstream libraries can now create
-their own layout engine and connect it to a figure.
+Matplotlib supplies two layout engines, `.TightLayoutEngine` and
+`.ConstrainedLayoutEngine`.  Third parties can create their own layout engine by
+subclassing `.LayoutEngine`.
 """
+
+from contextlib import nullcontext
 
 import matplotlib as mpl
 import matplotlib._api as _api
@@ -26,46 +23,62 @@ from matplotlib._constrained_layout import do_constrained_layout
 from matplotlib.tight_layout import (get_subplotspec_list,
                                      get_tight_layout_figure)
 from matplotlib.backend_bases import _get_renderer
-from contextlib import nullcontext
 
 
-class LayoutEngine():
+class LayoutEngine:
     """
     Base class for Matplotlib layout engines.
 
-    A layout engine can be passed to a figure at instantiation or
-    at any time with `~.figure.Figure.set_layout_engine`.  However, note
-    note that layout engines affect the creation of colorbars, so
-    `~.figure.Figure.set_layout_engine` should be called before any
-    colorbars are created.
+    A layout engine can be passed to a figure at instantiation or at any time
+    with `~.figure.Figure.set_layout_engine`.  However, note note that layout
+    engines affect the creation of colorbars, so
+    `~.figure.Figure.set_layout_engine` should be called before any colorbars
+    are created.
 
-    Once attached to a figure, the layout engine ``execute`` function
-    is called at draw time by `~.figure.Figure.draw`, providing a special
-    draw-time hook.
+    Once attached to a figure, the layout engine ``execute`` function is called
+    at draw time by `~.figure.Figure.draw`, providing a special draw-time hook.
 
-    Currently, there are two properties of ``LayoutEngine`` classes that
-    are consulted while manipulating the figure.  ``engine.colorbar_gridspec``
+    Currently, there are two properties of ``LayoutEngine`` classes that are
+    consulted while manipulating the figure.  ``engine.get_colorbar_gridspec``
     tells `.Figure.colorbar` whether to make the axes using the gridspec
     method (see `.colorbar.make_axes_gridspec`) or not
-    (see `.colorbar.make_axes`); for the native layout engines
-    `.ConstrainedLayoutEngine` sets this to *False*.  The second property
-    is ``engine.adjust_compatible`` that stops `.Figure.subplots_adjust` from
+    (see `.colorbar.make_axes`); `.ConstrainedLayoutEngine` sets this to
+    *False*, `.TightLayoutEngine` to *True*.  The second property is
+    ``engine.adjust_compatible`` that stops `.Figure.subplots_adjust` from
     being run if it is not compatible with the layout engine
     (`.ConstrainedLayoutEngine` sets this to *False* also).
     """
-    def __init__(self, **kwargs):
+
+    def __init__(self):
         self._figure = None
-        self.colorbar_gridspec = True
         self._params = {}
-        self.adjust_compatible = False
+        self._adjust_compatible = True
+        self._colorbar_gridspec = True
 
     def set(self, **kwargs):
         raise NotImplementedError
 
+    def get_colorbar_gridspec(self):
+        """
+        Return a boolean if the layout engine creates colorbars using a
+        gridspec.
+        """
+        return self._colorbar_gridspec
+
+    def get_adjust_compatible(self):
+        """
+        Return a boolean if the layout engine is compatible with
+        `~.Figure.subplots_adjust`.
+        """
+        return self._adjust_compatible
+
     def get(self):
+        """
+        Return the parameters for the layout engine.
+        """
         return self._params
 
-    def execute(self):
+    def execute(self, fig):
         raise NotImplementedError
 
     def set_figure(self, figure):
@@ -86,7 +99,8 @@ class LayoutEngine():
 
 class TightLayoutEngine(LayoutEngine):
     """
-    Implements the ``tight_layout`` geometry management.
+    Implements the ``tight_layout`` geometry management.  See
+    :doc:`/tutorials/intermediate/tight_layout_guide` for details.
     """
 
     def __init__(self, *, pad=1.08, h_pad=None, w_pad=None,
@@ -108,14 +122,14 @@ class TightLayoutEngine(LayoutEngine):
             will fit into. Defaults to using the entire figure.
         """
         super().__init__()
-        self.colorbar_gridspec = True
-        self.adjust_compatible = True
         for td in ['pad', 'h_pad', 'w_pad', 'rect']:
             # initialize these in case None is passed in above:
             self._params[td] = None
         self.set(pad=pad, h_pad=h_pad, w_pad=w_pad, rect=rect)
+        self._adjust_compatible = True
+        self._colorbar_gridspec = True
 
-    def execute(self):
+    def execute(self, fig):
         """
         Execute tight_layout.
 
@@ -123,9 +137,12 @@ class TightLayoutEngine(LayoutEngine):
         will allow the axes labels to not be covered by other labels
         and axes.
 
+        Parameters
+        ----------
+        fig : `.Figure` to perform layout on.
+
         See also: `.figure.Figure.tight_layout` and `.pyplot.tight_layout`.
         """
-        fig = self._figure
         info = self._params
         subplotspec_list = get_subplotspec_list(fig.axes)
         if None in subplotspec_list:
@@ -142,15 +159,14 @@ class TightLayoutEngine(LayoutEngine):
             fig.subplots_adjust(**kwargs)
 
     def set(self, *, pad=None, w_pad=None, h_pad=None, rect=None):
-        todo = ['pad', 'w_pad', 'h_pad', 'rect']
-        for td in todo:
+        for td in self.set.__kwdefaults__:
             if locals()[td] is not None:
                 self._params[td] = locals()[td]
 
-
 class ConstrainedLayoutEngine(LayoutEngine):
     """
-    Implements the ``constrained_layout`` geometry management.
+    Implements the ``constrained_layout`` geometry management.  See
+    :doc:`/tutorials/intermediate/constrained_layout_guide` for details.
     """
 
     def __init__(self, *, h_pad=None, w_pad=None,
@@ -174,8 +190,6 @@ class ConstrainedLayoutEngine(LayoutEngine):
             :rc:`figure.constrained_layout.wspace`.
         """
         super().__init__()
-        self.colorbar_gridspec = False
-        self.adjust_compatible = False
         # set the defaults:
         self.set(w_pad=mpl.rcParams['figure.constrained_layout.w_pad'],
                  h_pad=mpl.rcParams['figure.constrained_layout.h_pad'],
@@ -183,17 +197,23 @@ class ConstrainedLayoutEngine(LayoutEngine):
                  hspace=mpl.rcParams['figure.constrained_layout.hspace'])
         # set anything that was passed in (None will be ignored):
         self.set(w_pad=w_pad, h_pad=h_pad, wspace=wspace, hspace=hspace)
+        self._adjust_compatible = False
+        self._colorbar_gridspec = False
 
-    def execute(self):
+    def execute(self, fig):
         """
         Perform constrained_layout and move and resize axes accordingly.
+
+        Parameters
+        ----------
+        fig : `.Figure` to perform layout on.
         """
-        width, height = self._figure.get_size_inches()
+        width, height = fig.get_size_inches()
         # pads are relative to the current state of the figure...
         w_pad = self._params['w_pad'] / width
         h_pad = self._params['h_pad'] / height
 
-        return do_constrained_layout(self._figure, w_pad=w_pad, h_pad=h_pad,
+        return do_constrained_layout(fig, w_pad=w_pad, h_pad=h_pad,
                                      wspace=self._params['wspace'],
                                      hspace=self._params['hspace'])
 

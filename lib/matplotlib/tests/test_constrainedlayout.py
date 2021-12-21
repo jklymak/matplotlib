@@ -431,7 +431,7 @@ def test_colorbar_align():
                 ax.set_xticklabels([])
                 ax.set_yticklabels([])
         fig.get_layout_engine().set(w_pad=4 / 72, h_pad=4 / 72,
-                                           hspace=0.1, wspace=0.1)
+                                    hspace=0.1, wspace=0.1)
 
         fig.draw_without_rendering()
         if location in ['left', 'right']:

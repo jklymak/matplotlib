@@ -228,7 +228,7 @@ fig.savefig('../../doc/_static/constrained_layout_2b.png',
 #
 # Padding between axes is controlled in the horizontal by *w_pad* and
 # *wspace*, and vertical by *h_pad* and *hspace*.  These can be edited
-# via ``fig.get_layout_engine().set``.  *w/h_pad* are
+# via `~.layout_engine.ConstrainedLayoutEngine.set`.  *w/h_pad* are
 # the minimum space around the axes in units of inches:
 
 fig, axs = plt.subplots(2, 2, layout="constrained")
