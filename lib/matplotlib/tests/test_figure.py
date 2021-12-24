@@ -598,6 +598,30 @@ def test_invalid_layouts():
                        match="Invalid value for 'layout'"):
         Figure(layout='foobar')
 
+    # test that layouts can be swapped if no colorbar:
+    fig, ax = plt.subplots(layout="constrained")
+    fig.set_layout_engine("tight")
+    assert isinstance(fig.get_layout_engine(), TightLayoutEngine)
+    fig.set_layout_engine("constrained")
+    assert isinstance(fig.get_layout_engine(), ConstrainedLayoutEngine)
+
+    # test that layouts cannot be swapped if there is a colorbar:
+    fig, ax = plt.subplots(layout="constrained")
+    pc = ax.pcolormesh(np.random.randn(2, 2))
+    fig.colorbar(pc)
+    with pytest.warns(UserWarning, match='Colorbar layout of new layout'):
+        fig.set_layout_engine("tight")
+    # check that engine didn't change
+    assert isinstance(fig.get_layout_engine(), ConstrainedLayoutEngine)
+
+    fig, ax = plt.subplots(layout="tight")
+    pc = ax.pcolormesh(np.random.randn(2, 2))
+    fig.colorbar(pc)
+    with pytest.warns(UserWarning, match='Colorbar layout of new layout'):
+        fig.set_layout_engine("constrained")
+    # check that engine didn't change
+    assert isinstance(fig.get_layout_engine(), TightLayoutEngine)
+
 
 @check_figures_equal(extensions=["png", "pdf"])
 def test_add_artist(fig_test, fig_ref):

@@ -2327,6 +2327,23 @@ class Figure(FigureBase):
         # list of child gridspecs for this figure
         self._gridspecs = []
 
+    def _check_layout_engines_compat(self, old, new):
+        """
+        Helper for set_layout engine
+
+        If the figure has used the old engine and added a colorbar then the
+        value of colorbar_gridspec must be the same on the new engine.
+        """
+        if old is None or old.colorbar_gridspec == new.colorbar_gridspec:
+            return True
+        # colorbar layout different, so check if any colorbars are on the
+        # figure...
+        for ax in self.axes:
+            if hasattr(ax, '_colorbar'):
+                # colorbars list themselvs as a colorbar.
+                return False
+        return True
+
     def set_layout_engine(self, layout=None, **kwargs):
         """
         Set the layout engine for this figure.
@@ -2350,14 +2367,21 @@ class Figure(FigureBase):
                 self._layout_engine = None
                 return
         if layout == 'tight':
-            self._layout_engine = TightLayoutEngine(**kwargs)
+            new_layout_engine = TightLayoutEngine(**kwargs)
         elif layout == 'constrained':
-            self._layout_engine = ConstrainedLayoutEngine(**kwargs)
+            new_layout_engine = ConstrainedLayoutEngine(**kwargs)
         elif isinstance(layout, LayoutEngine):
-            self._layout_engine = layout
+            new_layout_engine = layout
         else:
             raise ValueError(f"Invalid value for 'layout': {layout!r}")
-        self._layout_engine.set_figure(self)
+
+        if self._check_layout_engines_compat(self._layout_engine,
+                                             new_layout_engine):
+            self._layout_engine = new_layout_engine
+        else:
+            _api.warn_external('Colorbar layout of new layout engine not '
+                               'compatible with old engine, and a colorbar '
+                               'has been created.  Engine not changed.')
 
     def get_layout_engine(self):
         return self._layout_engine
