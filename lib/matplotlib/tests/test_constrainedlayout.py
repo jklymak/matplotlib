@@ -1,3 +1,4 @@
+from matplotlib._api.deprecation import MatplotlibDeprecationWarning
 import numpy as np
 import pytest
 
@@ -567,3 +568,20 @@ def test_gridspec_addressing():
     gs = fig.add_gridspec(3, 3)
     sp = fig.add_subplot(gs[0:, 1:])
     fig.draw_without_rendering()
+
+
+def test_discouraged_api():
+    fig, ax = plt.subplots(constrained_layout=True)
+    fig.draw_without_rendering()
+
+    with pytest.warns(MatplotlibDeprecationWarning,
+                      match="was deprecated in Matplotlib 3.6"):
+        fig, ax = plt.subplots()
+        fig.set_constrained_layout(True)
+        fig.draw_without_rendering()
+
+    with pytest.warns(MatplotlibDeprecationWarning,
+                      match="was deprecated in Matplotlib 3.6"):
+        fig, ax = plt.subplots()
+        fig.set_constrained_layout({'w_pad': 0.02, 'h_pad': 0.02})
+        fig.draw_without_rendering()

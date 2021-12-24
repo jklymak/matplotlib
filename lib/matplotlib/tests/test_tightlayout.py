@@ -1,4 +1,5 @@
 import warnings
+from matplotlib._api.deprecation import MatplotlibDeprecationWarning
 
 import numpy as np
 from numpy.testing import assert_array_equal
@@ -367,3 +368,11 @@ def test_clipped_to_axes():
         m.set_clip_path(rect.get_path(), rect.get_transform())
         assert not h._fully_clipped_to_axes()
         assert not m._fully_clipped_to_axes()
+
+
+def test_tight_pads():
+    fig, ax = plt.subplots()
+    with pytest.warns(MatplotlibDeprecationWarning,
+                      match='was deprecated in Matplotlib 3.6'):
+        fig.set_tight_layout({'pad': 0.15})
+    fig.draw_without_rendering()
