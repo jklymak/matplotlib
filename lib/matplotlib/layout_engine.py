@@ -3,15 +3,15 @@ Classes to layout elements in a `.Figure`.
 
 Figures have a ``layout_engine`` property that holds a subclass of
 `~.LayoutEngine` defined here (or *None* for no layout).  At draw time
-``figure.get_layout_engine().execute()`` is called, the goal of which is usually
-to rearrange Axes on the figure to produce a pleasing layout. This is like a
-``draw`` callback, however when printing we disable the layout engine for the
-final draw and it is useful to know the layout engine while the figure is being
-created, in particular to deal with colorbars.
+``figure.get_layout_engine().execute()`` is called, the goal of which is
+usually to rearrange Axes on the figure to produce a pleasing layout. This is
+like a ``draw`` callback, however when printing we disable the layout engine
+for the final draw and it is useful to know the layout engine while the figure
+is being created, in particular to deal with colorbars.
 
 Matplotlib supplies two layout engines, `.TightLayoutEngine` and
-`.ConstrainedLayoutEngine`.  Third parties can create their own layout engine by
-subclassing `.LayoutEngine`.
+`.ConstrainedLayoutEngine`.  Third parties can create their own layout engine
+by subclassing `.LayoutEngine`.
 """
 
 from contextlib import nullcontext
@@ -39,7 +39,7 @@ class LayoutEngine:
     at draw time by `~.figure.Figure.draw`, providing a special draw-time hook.
 
     Currently, there are two properties of ``LayoutEngine`` classes that are
-    consulted while manipulating the figure.  ``engine.get_colorbar_gridspec``
+    consulted while manipulating the figure.  ``engine.colorbar_gridspec``
     tells `.Figure.colorbar` whether to make the axes using the gridspec
     method (see `.colorbar.make_axes_gridspec`) or not
     (see `.colorbar.make_axes`); `.ConstrainedLayoutEngine` sets this to
@@ -58,14 +58,16 @@ class LayoutEngine:
     def set(self, **kwargs):
         raise NotImplementedError
 
-    def get_colorbar_gridspec(self):
+    @property
+    def colorbar_gridspec(self):
         """
         Return a boolean if the layout engine creates colorbars using a
         gridspec.
         """
         return self._colorbar_gridspec
 
-    def get_adjust_compatible(self):
+    @property
+    def adjust_compatible(self):
         """
         Return a boolean if the layout engine is compatible with
         `~.Figure.subplots_adjust`.
@@ -162,6 +164,7 @@ class TightLayoutEngine(LayoutEngine):
         for td in self.set.__kwdefaults__:
             if locals()[td] is not None:
                 self._params[td] = locals()[td]
+
 
 class ConstrainedLayoutEngine(LayoutEngine):
     """

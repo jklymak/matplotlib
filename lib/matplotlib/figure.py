@@ -1134,7 +1134,7 @@ default: %(va)s
             ax = getattr(mappable, "axes", self.gca())
 
         if (self.get_layout_engine() is not None and
-                not self.get_layout_engine().get_colorbar_gridspec()):
+                not self.get_layout_engine().colorbar_gridspec):
             use_gridspec = False
         # Store the value of gca so that we can set it back later on.
         if cax is None:
@@ -1189,7 +1189,7 @@ default: %(va)s
             as a fraction of the average Axes height.
         """
         if (self.get_layout_engine() is not None and
-                not self.get_layout_engine().get_adjust_compatible()):
+                not self.get_layout_engine().adjust_compatible):
             _api.warn_external(
                 "This figure was using a layout engine that is "
                 "incompatible with subplots_adjust and/or tight_layout; "
