@@ -585,10 +585,11 @@ def test_invalid_layouts():
 
     # Using layout + (tight|constrained)_layout warns, but the former takes
     # precedence.
-    wst = "The Figure parameters 'layout' and 'tight_layout' or "
+    wst = "The Figure parameters 'layout' and 'tight_layout'"
     with pytest.warns(UserWarning, match=wst):
         fig = Figure(layout='tight', tight_layout=False)
     assert isinstance(fig.get_layout_engine(), TightLayoutEngine)
+    wst = "The Figure parameters 'layout' and 'constrained_layout'"
     with pytest.warns(UserWarning, match=wst):
         fig = Figure(layout='constrained', constrained_layout=False)
     assert not isinstance(fig.get_layout_engine(), TightLayoutEngine)
