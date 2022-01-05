@@ -81,9 +81,9 @@ class LayoutEngine:
 
     def get(self):
         """
-        Return the parameters for the layout engine.
+        Return copy of the parameters for the layout engine.
         """
-        return self._params
+        return dict(self._params)
 
     def execute(self, fig):
         """
