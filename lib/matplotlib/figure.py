@@ -2230,8 +2230,9 @@ class Figure(FigureBase):
               further details.
 
             - A `.LayoutEngine` instance. Builtin layout classes are
-              `.TightLayoutEngine` and `.ConstrainedLayoutEngine`.
-              However other subclasses are possible.
+              `.ConstrainedLayoutEngine` and `.TightLayoutEngine`, more easily
+              accessible by 'constrained' and 'tight'.  Passing an instance
+              allows third parties to provide their own layout engine.
 
             If not given, fall back to using the parameters *tight_layout* and
             *constrained_layout*, including their config defaults
@@ -2247,12 +2248,14 @@ class Figure(FigureBase):
         self._layout_engine = None
 
         if layout is not None:
-            if (tight_layout is not None or
-                    constrained_layout is not None):
+            if (tight_layout is not None):
                 _api.warn_external(
-                    "The Figure parameters 'layout' and 'tight_layout' or "
-                    "'constrained_layout' cannot be used together. Please use "
-                    "'layout' only.")
+                    "The Figure parameters 'layout' and 'tight_layout' cannot "
+                    "be used together. Please use 'layout' only.")
+            if (constrained_layout is not None):
+                _api.warn_external(
+                    "The Figure parameters 'layout' and 'constrained_layout' "
+                    "cannot be used together. Please use 'layout' only.")
             self.set_layout_engine(layout=layout)
         elif tight_layout is not None:
             if constrained_layout is not None:
@@ -2566,10 +2569,11 @@ class Figure(FigureBase):
     @_api.deprecated("3.6", alternative="fig.get_layout_engine().get_info()")
     def get_constrained_layout_pads(self, relative=False):
         """
-        Get padding for ``constrained_layout`` if it is the ``layout_engine``.
+        Get padding for ``constrained_layout``.
 
         Returns a list of ``w_pad, h_pad`` in inches and
         ``wspace`` and ``hspace`` as fractions of the subplot.
+        All values are None if ``constrained_layout`` is not used.
 
         See :doc:`/tutorials/intermediate/constrainedlayout_guide`.
 
