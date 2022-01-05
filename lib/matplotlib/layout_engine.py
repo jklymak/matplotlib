@@ -30,23 +30,31 @@ class LayoutEngine:
     Base class for Matplotlib layout engines.
 
     A layout engine can be passed to a figure at instantiation or at any time
-    with `~.figure.Figure.set_layout_engine`.  However, note note that layout
-    engines affect the creation of colorbars, so
-    `~.figure.Figure.set_layout_engine` should be called before any colorbars
-    are created.
+    with `~.figure.Figure.set_layout_engine`.  Once attached to a figure, the
+    layout engine ``execute`` function is called at draw time by
+    `~.figure.Figure.draw`, providing a special draw-time hook.
 
-    Once attached to a figure, the layout engine ``execute`` function is called
-    at draw time by `~.figure.Figure.draw`, providing a special draw-time hook.
+    .. note ::
 
-    Currently, there are two properties of ``LayoutEngine`` classes that are
-    consulted while manipulating the figure.  ``engine.colorbar_gridspec``
-    tells `.Figure.colorbar` whether to make the axes using the gridspec
-    method (see `.colorbar.make_axes_gridspec`) or not
-    (see `.colorbar.make_axes`); `.ConstrainedLayoutEngine` sets this to
-    *False*, `.TightLayoutEngine` to *True*.  The second property is
-    ``engine.adjust_compatible`` that stops `.Figure.subplots_adjust` from
-    being run if it is not compatible with the layout engine
-    (`.ConstrainedLayoutEngine` sets this to *False* also).
+       However, note that layout engines affect the creation of colorbars, so
+       `~.figure.Figure.set_layout_engine` should be called before any
+       colorbars are created.
+
+    Currently, there are two properties of `LayoutEngine` classes that are
+    consulted while manipulating the figure:
+
+    - ``engine.colorbar_gridspec`` tells `.Figure.colorbar` whether to make the
+       axes using the gridspec method (see `.colorbar.make_axes_gridspec`) or
+       not (see `.colorbar.make_axes`);
+    - ``engine.adjust_compatible`` stops `.Figure.subplots_adjust` from being run
+       if it is not compatible with the layout engine.
+
+    To implement a custom `LayoutEngine`:
+
+    1. override ``_adjust_compatible`` and ``_colorbar_gridspec``
+    2. override `LayoutEngine.set` to update *self._params*
+    3. override `LayoutEngine.execute` with your implementation
+
     """
     # override these is sub-class
     _adjust_compatible = None
