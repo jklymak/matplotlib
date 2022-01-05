@@ -50,7 +50,6 @@ class LayoutEngine:
     """
 
     def __init__(self):
-        self._figure = None
         self._params = {}
         self._adjust_compatible = True
         self._colorbar_gridspec = True
@@ -81,22 +80,11 @@ class LayoutEngine:
         return self._params
 
     def execute(self, fig):
+        """
+        Execute the layout on the figure given by *fig*.
+        """
+        # subclasses must impliment this.
         raise NotImplementedError
-
-    def set_figure(self, figure):
-        """
-        Set the figure for the layout manager.
-        """
-        if self._figure == figure:
-            return
-        if self._figure is None:
-            self._figure = figure
-        else:
-            raise ValueError(
-                'Layout managers cannot be attached to more than one figure')
-
-    def get_figure(self):
-        return self._figure
 
 
 class TightLayoutEngine(LayoutEngine):
