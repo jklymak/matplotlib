@@ -52,7 +52,8 @@ class LayoutEngine:
     _adjust_compatible = None
     _colorbar_gridspec = None
 
-    def __init__(self):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self._params = {}
 
     def set(self, **kwargs):
@@ -101,7 +102,7 @@ class TightLayoutEngine(LayoutEngine):
     _colorbar_gridspec = True
 
     def __init__(self, *, pad=1.08, h_pad=None, w_pad=None,
-                 rect=(0, 0, 1, 1)):
+                 rect=(0, 0, 1, 1), **kwargs):
         """
         Initialize tight_layout engine.
 
@@ -118,7 +119,7 @@ class TightLayoutEngine(LayoutEngine):
             coordinates that the subplots (including labels)
             will fit into. Defaults to using the entire figure.
         """
-        super().__init__()
+        super().__init__(**kwargs)
         for td in ['pad', 'h_pad', 'w_pad', 'rect']:
             # initialize these in case None is passed in above:
             self._params[td] = None
@@ -169,7 +170,7 @@ class ConstrainedLayoutEngine(LayoutEngine):
     _colorbar_gridspec = False
 
     def __init__(self, *, h_pad=None, w_pad=None,
-                 hspace=None, wspace=None):
+                 hspace=None, wspace=None, **kwargs):
         """
         Initialize ``constrained_layout`` settings.
 
@@ -188,7 +189,7 @@ class ConstrainedLayoutEngine(LayoutEngine):
             Default to :rc:`figure.constrained_layout.hspace` and
             :rc:`figure.constrained_layout.wspace`.
         """
-        super().__init__()
+        super().__init__(**kwargs)
         # set the defaults:
         self.set(w_pad=mpl.rcParams['figure.constrained_layout.w_pad'],
                  h_pad=mpl.rcParams['figure.constrained_layout.h_pad'],
