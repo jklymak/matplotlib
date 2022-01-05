@@ -48,11 +48,12 @@ class LayoutEngine:
     being run if it is not compatible with the layout engine
     (`.ConstrainedLayoutEngine` sets this to *False* also).
     """
+    # override these is sub-class
+    _adjust_compatible = None
+    _colorbar_gridspec = None
 
     def __init__(self):
         self._params = {}
-        self._adjust_compatible = True
-        self._colorbar_gridspec = True
 
     def set(self, **kwargs):
         raise NotImplementedError
@@ -63,6 +64,8 @@ class LayoutEngine:
         Return a boolean if the layout engine creates colorbars using a
         gridspec.
         """
+        if self._colorbar_gridspec is None:
+            raise NotImplementedError
         return self._colorbar_gridspec
 
     @property
@@ -71,6 +74,8 @@ class LayoutEngine:
         Return a boolean if the layout engine is compatible with
         `~.Figure.subplots_adjust`.
         """
+        if self._adjust_compatible is None:
+            raise NotImplementedError
         return self._adjust_compatible
 
     def get(self):
@@ -92,6 +97,8 @@ class TightLayoutEngine(LayoutEngine):
     Implements the ``tight_layout`` geometry management.  See
     :doc:`/tutorials/intermediate/tight_layout_guide` for details.
     """
+    _adjust_compatible = True
+    _colorbar_gridspec = True
 
     def __init__(self, *, pad=1.08, h_pad=None, w_pad=None,
                  rect=(0, 0, 1, 1)):
@@ -116,8 +123,6 @@ class TightLayoutEngine(LayoutEngine):
             # initialize these in case None is passed in above:
             self._params[td] = None
         self.set(pad=pad, h_pad=h_pad, w_pad=w_pad, rect=rect)
-        self._adjust_compatible = True
-        self._colorbar_gridspec = True
 
     def execute(self, fig):
         """
@@ -160,6 +165,9 @@ class ConstrainedLayoutEngine(LayoutEngine):
     :doc:`/tutorials/intermediate/constrained_layout_guide` for details.
     """
 
+    _adjust_compatible = False
+    _colorbar_gridspec = False
+
     def __init__(self, *, h_pad=None, w_pad=None,
                  hspace=None, wspace=None):
         """
@@ -188,8 +196,6 @@ class ConstrainedLayoutEngine(LayoutEngine):
                  hspace=mpl.rcParams['figure.constrained_layout.hspace'])
         # set anything that was passed in (None will be ignored):
         self.set(w_pad=w_pad, h_pad=h_pad, wspace=wspace, hspace=hspace)
-        self._adjust_compatible = False
-        self._colorbar_gridspec = False
 
     def execute(self, fig):
         """
