@@ -1932,7 +1932,7 @@ class Axes(_AxesBase):
         ----------
         x : array-like
 
-        detrend : callable, default: `.mlab.detrend_none` (no detrending)
+        detrend : callable, default: no detrending
             A detrending function applied to *x*.  It must have the
             signature ::
 
@@ -1996,7 +1996,7 @@ class Axes(_AxesBase):
         return self.xcorr(x, x, **kwargs)
 
     @_preprocess_data(replace_names=["x", "y"], label_namer="y")
-    def xcorr(self, x, y, normed=True, detrend=mlab.detrend_none,
+    def xcorr(self, x, y, normed=True, detrend=None,
               usevlines=True, maxlags=10, **kwargs):
         r"""
         Plot the cross correlation between *x* and *y*.
@@ -2009,7 +2009,7 @@ class Axes(_AxesBase):
         ----------
         x, y : array-like of length n
 
-        detrend : callable, default: `.mlab.detrend_none` (no detrending)
+        detrend : callable, default: no detrending
             A detrending function applied to *x* and *y*.  It must have the
             signature ::
 
@@ -2074,8 +2074,9 @@ class Axes(_AxesBase):
         if Nx != len(y):
             raise ValueError('x and y must be equal length')
 
-        x = detrend(np.asarray(x))
-        y = detrend(np.asarray(y))
+        if detrend is not None:
+            x = detrend(np.asarray(x))
+            y = detrend(np.asarray(y))
 
         correls = np.correlate(x, y, mode="full")
 
@@ -7138,6 +7139,7 @@ such objects
 
         return h, xedges, yedges, pc
 
+    @_api.deprecated("3.8", alternative="scipy.signal.psd and ax.loglog")
     @_preprocess_data(replace_names=["x"])
     @_docstring.dedent_interpd
     def psd(self, x, NFFT=None, Fs=None, Fc=None, detrend=None,
@@ -7249,6 +7251,7 @@ such objects
         else:
             return pxx, freqs, line
 
+    @_api.deprecated("3.8", alternative="scipy.signal.csd and ax.plot")
     @_preprocess_data(replace_names=["x", "y"], label_namer="y")
     @_docstring.dedent_interpd
     def csd(self, x, y, NFFT=None, Fs=None, Fc=None, detrend=None,
@@ -7351,6 +7354,9 @@ such objects
         else:
             return pxy, freqs, line
 
+    @_api.deprecated(
+        "3.7",
+        alternative="scipy.signal.spectrogram(mode='magnitude') and ax.loglog")
     @_preprocess_data(replace_names=["x"])
     @_docstring.dedent_interpd
     def magnitude_spectrum(self, x, Fs=None, Fc=None, window=None,
@@ -7437,6 +7443,9 @@ such objects
 
         return spec, freqs, line
 
+    @_api.deprecated("3.8",
+                     alternative="scipy.signal.spectrogram(mode='angle') and "
+                                 "ax.loglog")
     @_preprocess_data(replace_names=["x"])
     @_docstring.dedent_interpd
     def angle_spectrum(self, x, Fs=None, Fc=None, window=None,
@@ -7506,6 +7515,9 @@ such objects
 
         return spec, freqs, lines[0]
 
+    @_api.deprecated("3.8",
+                     alternative="scipy.signal.spectrogram(mode='phase') and "
+                                 "ax.loglog")
     @_preprocess_data(replace_names=["x"])
     @_docstring.dedent_interpd
     def phase_spectrum(self, x, Fs=None, Fc=None, window=None,
@@ -7575,6 +7587,8 @@ such objects
 
         return spec, freqs, lines[0]
 
+    @_api.deprecated("3.8", alternative="scipy.signal.coherence and "
+                                        "ax.semilogx")
     @_preprocess_data(replace_names=["x", "y"])
     @_docstring.dedent_interpd
     def cohere(self, x, y, NFFT=256, Fs=2, Fc=0, detrend=mlab.detrend_none,
@@ -7639,6 +7653,9 @@ such objects
 
         return cxy, freqs
 
+    @_api.deprecated("3.8",
+                     alternative="scipy.signal.spectrogram(mode='psd') and "
+                                 "ax.loglog")
     @_preprocess_data(replace_names=["x"])
     @_docstring.dedent_interpd
     def specgram(self, x, NFFT=None, Fs=None, Fc=None, detrend=None,
