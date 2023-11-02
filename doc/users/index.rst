@@ -17,6 +17,8 @@ Using Matplotlib
             :maxdepth: 2
             :includehidden:
 
+            getting_started/index
+            installing/index
             explain/quick_start
 
         .. toctree::
@@ -96,11 +98,3 @@ Using Matplotlib
             :includehidden:
 
             explain/toolkits/index
-
-
-.. toctree::
-    :hidden:
-
-    explain/index
-    getting_started/index
-    installing/index
